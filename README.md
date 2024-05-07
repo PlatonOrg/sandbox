@@ -21,7 +21,7 @@ Installing the server is pretty straightforward, you just need to clone the repo
 the install script :
 
 ```bash
-git clone https://github.com/PremierLangage/sandbox.git
+git clone https://github.com/PlatonOrg/sandbox.git
 cd sanbox
 ./bin/install.sh  
 ```
