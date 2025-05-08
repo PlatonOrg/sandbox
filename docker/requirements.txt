@@ -16,3 +16,5 @@ pandas
 pylama
 pylint
 zxcvbn
+pytest
+faker
