@@ -5,6 +5,7 @@ sympy
 matplotlib
 automata-lib
 fado
+faker
 tr-greenery
 wimsapi
 graphviz
@@ -15,6 +16,6 @@ prettytable
 pandas
 pylama
 pylint
-zxcvbn
 pytest
-faker
+zxcvbn
+
