@@ -12,8 +12,9 @@ graphviz
 mpld3
 networkx
 scipy
-prettytable
 pandas
+Pillow
+prettytable
 pylama
 pylint
 pytest
