@@ -1,11 +1,10 @@
-FROM debian:buster
+FROM debian:bookworm
 
-LABEL maintainer="coumes.quentin@gmail.com"
+LABEL maintainer="thomas.saillard2@univ-eiffel.fr"
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Installing base requirements
-RUN echo 'deb http://archive.debian.org/debian-security stretch/updates main contrib non-free' > /etc/apt/sources.list.d/backports.list
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
     gnupg2 \
@@ -26,12 +25,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ocaml \
     perl \
     perl-doc \
-    openjdk-11-jdk \
     python3-distutils \
-    python2 \
+    python3-pip \
     postgresql \
     libbsd-dev \
-    sqlite \
+    sqlite3 \
     r-base \
     && apt-get clean \
     && apt-get autoclean \
@@ -43,37 +41,52 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 2
 
 # Installing pip3 and python's requirements
 ADD requirements.txt .
-RUN wget --progress=dot:giga --no-check-certificate https://bootstrap.pypa.io/pip/3.7/get-pip.py -O /tmp/get-pip.py &&\
-    python3 /tmp/get-pip.py &&\
-    pip3 --no-cache-dir install wheel &&\
-    pip3 --no-cache-dir install -r requirements.txt
+RUN pip3 --no-cache-dir install --upgrade --break-system-packages pip setuptools wheel &&\
+    pip3 --no-cache-dir install --break-system-packages -r requirements.txt
 
+# Installing nvm, node and npm
+ENV NODE_VERSION=v20.13.1
+ADD package.json .
+RUN mkdir -p /usr/local/nvm
+ENV NVM_DIR=/usr/local/nvm
+RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash \
+    && . $NVM_DIR/nvm.sh \
+    && nvm install $NODE_VERSION \
+    && npm i -D @swc/cli @swc/core \
+    && npm i --save-dev -g
+RUN mkdir -p /var/www/.npm/_logs
+RUN touch /var/www/.npm/_update-notifier-last-checked
+RUN chmod 755 -R /var/www/.npm/
+RUN chown -R www-data:www-data /var/www/.npm/
 
-# Installing Java 11
-RUN update-alternatives --install /usr/bin/java java  /usr/lib/jvm/java-11-openjdk-amd64/bin/java 2
-RUN update-alternatives --install /usr/bin/javac javac  /usr/lib/jvm/java-11-openjdk-amd64/bin/javac 2
-RUN mkdir /utils
-RUN mkdir /utils/libs/
-ENV PATH="/utils/libs/:${PATH}"
-ENV PYTHONPATH="/utils/libs/:${PYTHONPATH}"
-RUN wget \
-    https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.4.0-M1/junit-platform-console-standalone-1.4.0-M1.jar \
-    -O- > /utils/junit-platform-console-standalone.jar
-RUN export JAVA_HOME=/usr/lib/jvm/jdk-11.0.2/
+ENV PATH="/usr/local/nvm/versions/node/${NODE_VERSION}/bin:${PATH}"
 
+# Installing Java 22 
+RUN wget --progress=dot:giga https://download.oracle.com/java/22/archive/jdk-22_linux-$(arch | sed s/x86_64/x64/)_bin.tar.gz -O /tmp/jdk-22_linux_bin.targz &&\
+    mkdir -p jdk-22-oracle &&\
+    tar -xzvf /tmp/jdk-22_linux_bin.targz -C jdk-22-oracle --strip-components=1 &&\
+    mkdir -p /usr/lib/jvm/ &&\
+    cp -r jdk-22-oracle /usr/lib/jvm/ &&\
+    rm /tmp/jdk-22_linux_bin.targz &&\
+    ls -la /usr/lib/jvm/
+RUN update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-22-oracle/bin/java 3
+RUN update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/jdk-22-oracle/bin/javac 3
 
-# Copying libraries script
-COPY libraries.py /utils/libraries.py
+RUN mkdir -p /utils
+# Download Junit standalone jar
+RUN wget --progress=dot:giga https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.3/junit-platform-console-standalone-1.10.3.jar -O /utils/junit-platform-console-standalone.jar
+# Download JavaParser jar
+RUN wget --progress=dot:giga https://repo1.maven.org/maven2/com/github/javaparser/javaparser-core/3.26.1/javaparser-core-3.26.1.jar -O /utils/javaparser-core.jar
 
 # Cleaning /tmp
 RUN rm -Rf /tmp/*
 
 RUN yes | cpan -l > /dev/null 2>&1
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-ENV LC_TYPE en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV LC_TYPE=en_US.UTF-8
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 RUN locale-gen "en_US.UTF-8" && dpkg-reconfigure locales
 

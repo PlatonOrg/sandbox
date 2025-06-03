@@ -63,8 +63,6 @@ docker rmi -f pl:latest &> /dev/null || true
 docker buildx build --platform linux/amd64 -t pl:latest docker/ || {
     echo -n "$Red" >&2
     echo "ERROR: 'docker build -t pl:latest docker/' failed." >&2
-    echo "If getting: 'container: Error response from daemon: grpc: the connection is unavailable.'" >&2
-    echo "try: systemctl restart docker$Color_Off" >&2
     exit 1
 }
 

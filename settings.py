@@ -251,7 +251,7 @@ EXTERNAL_LIBRARIES_CRON_TRIGGER = CronTrigger(
 # every argument
 
 
-DOCKER_COUNT = 20 if not TESTING else 5
+DOCKER_COUNT = 3 if not TESTING else 5
 DOCKER_VOLUME_HOST_BASEDIR = os.path.join(BASE_DIR, "containers_env")
 DOCKER_PARAMETERS = {
     "image": "pl:latest",

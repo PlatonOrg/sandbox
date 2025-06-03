@@ -1,10 +1,11 @@
+setuptools
 markupsafe==2.0.1
 jinja2==2.10
 jsonpickle<1.4
 sympy
 matplotlib
 automata-lib
-fado
+FAdo==2.0.4 #To be compatible with Python 3.8
 faker
 tr-greenery
 wimsapi
