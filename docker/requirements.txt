@@ -19,4 +19,7 @@ pylama
 pylint
 pytest
 zxcvbn
+hypothesis
+pydantic
+fastapi
 
