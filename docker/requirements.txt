@@ -18,7 +18,7 @@ prettytable
 pylama
 pylint
 pytest
-pytest-json-report
+pytest-reportlog
 zxcvbn
 hypothesis
 pydantic
